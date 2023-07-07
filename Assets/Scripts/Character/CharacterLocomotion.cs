@@ -13,6 +13,7 @@ public class CharacterLocomotion : MonoBehaviour
     public float jumpDamp; //airSpeed
     public float groundSpeed;
     public float pushPower = 2.0F;
+    public bool isSprintings = false;
 
     
     private Animator animator;
@@ -24,7 +25,8 @@ public class CharacterLocomotion : MonoBehaviour
 
     private Vector3 rootMotion;
     private Vector3 velocity;
-    private bool isJumping;
+    public bool isJumping;
+    private SurvivalManager _survivalManager;
 
     private int isSprintingParam = Animator.StringToHash("isSprinting");
     
@@ -36,6 +38,7 @@ public class CharacterLocomotion : MonoBehaviour
         activeWeapon = GetComponent<ActiveWeapon>();
         reloadWeapon = GetComponent<ReloadWeapon>();
         characterAiming = GetComponent<CharacterAiming>();
+        _survivalManager = GetComponent<SurvivalManager>();
     }
 
     // Update is called once per frame
@@ -46,8 +49,10 @@ public class CharacterLocomotion : MonoBehaviour
         
         animator.SetFloat("InputX", input.x);
         animator.SetFloat("InputY", input.y);
-
+       
         UpdateIsSprinting();
+
+
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -58,11 +63,18 @@ public class CharacterLocomotion : MonoBehaviour
     bool IsSprinting()
     {
         bool isSprinting = Input.GetButton("Sprint");
+        
+        if (animator.GetFloat("InputY") >= 0.1f)
+        {
+            isSprintings = isSprinting;
+
+        }
         bool isFiring = activeWeapon.IsFiring();
         bool isReloading = reloadWeapon.isReloading;
         bool isChangingWeapon = activeWeapon.isChangingWeapon;
         bool isAiming = characterAiming.isAiming;
-        return isSprinting && !isFiring && !isReloading && !isChangingWeapon && !isAiming; //!isStamina
+        
+        return isSprinting && !isFiring && !isReloading && !isChangingWeapon && !isAiming && _survivalManager.HasStamina; //!isStamina
     }
 
     void UpdateIsSprinting()
